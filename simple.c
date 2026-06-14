@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <sys/stat.h>
-
-
 size_t count_chars(FILE* a) {
 	rewind(a);
 	size_t chars = 0;
@@ -28,10 +26,24 @@ size_t count_line(FILE* a) {
 
 int main(int argc, char* argv[]) {
 	if(!argv[1]) return 1;
+	if(strcmp(argv[1], "--help")==0) {
+		printf("editor		- opens the file and edits it (ctrl d to stop)\n"
+			"filter		- filter anything on argv[2] with the argument passed in argv[3]\n"
+			"read		- read a file\n"
+			"list		- list all files in argv[2], default its .\n"
+			"count		- count things\n"
+			"create_t	- create folder\n"
+			"create		- create a file\n"
+			"hex		- read a file in hex\n"
+			"usage = %s editor archive.txt\n", argv[0]);
+			return 0;
+	}
+
 	if(strcmp(argv[1], "editor") == 0) {
 		if(!argv[2]) return printf("%s editor filename\n", argv[0]);
 		FILE* f = fopen(argv[2], "w");
-		for(int c; (c = getchar()) != EOF; fputc(c, f));
+		int c;
+		for(c; (c = getchar()) != EOF; fputc(c, f));
 		fclose(f);
 	} else if(strcmp(argv[1], "filter") == 0) {
 		FILE* my_file = fopen(argv[2], "r");
@@ -56,7 +68,8 @@ int main(int argc, char* argv[]) {
 		fclose(my_file);
 	} else if(strcmp(argv[1], "list") == 0) {
 		struct dirent *de;
-		DIR *dr = opendir(".");
+		DIR *dr;
+		if(argv[2]) {dr = opendir(argv[2]);} else {dr = opendir(".");}
 		while ((de = readdir(dr)) != NULL)
         		printf("%s\n", de->d_name);
 		closedir(dr); 
@@ -73,7 +86,8 @@ int main(int argc, char* argv[]) {
 		FILE* my_file = fopen(argv[2], "r");
 		char* line = malloc(sizeof(char)*1000);
 		while(fgets(line, 1000, my_file) != NULL){ 
-			for(unsigned char c=0; c < strlen(line); ++c) {
+			unsigned char c=0;
+			for(c=0; c < strlen(line); ++c) {
 				printf("0x%X ", line[c]);
 			}
 			printf("\n");
